@@ -1,0 +1,47 @@
+body {
+    text-align: center;
+    margin: 0;
+    
+}
+
+.main-block {
+    margin: -20px auto 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 700px;  
+    text-align: left;
+  
+}
+
+.top-headers {
+    max-width: 95%;
+    color: white;
+    text-align: left;
+}
+
+.chat-window {
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /*Internet Explorer 10+ */
+  
+}
+.chat-window::-webkit-scrollbar { /* WebKit */
+    width: 0;
+    height: 0;
+}
+
+.chat-bubble h6 {
+    margin-block-start: 0.2rem;
+    margin-block-end: 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color:#757575;
+}
+
+.chat-bubble p {
+    margin-block-start: 0.2rem;
+    margin-block-end: 0.2rem;
+    font-size: 0.9rem;
+}
+
