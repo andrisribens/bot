@@ -1,0 +1,12 @@
+
+.chat-window {
+    max-height: 86%;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /*Internet Explorer 10+ */
+  
+}
+.chat-window::-webkit-scrollbar { /* WebKit */
+    width: 0; 
+    height: 0;
+}

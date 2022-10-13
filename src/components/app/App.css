@@ -1,0 +1,19 @@
+body {
+    text-align: center;
+    margin: 0;   
+}
+
+.main-block {
+    margin: -20px auto 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 700px;  
+    text-align: left;
+}
+
+.top-headers {
+    max-width: 95%;
+    color: white;
+    text-align: left;
+}

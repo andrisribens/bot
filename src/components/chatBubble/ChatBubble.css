@@ -1,0 +1,19 @@
+.chat-bubble {
+    text-align: left;
+    display: flex;
+}
+
+.chat-bubble h6 {
+    margin-block-start: 0.2rem;
+    margin-block-end: 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color:#757575;
+}
+
+.chat-bubble p {
+    margin-block-start: 0.2rem;
+    margin-block-end: 0.2rem;
+    font-size: 0.9rem;
+}
+
