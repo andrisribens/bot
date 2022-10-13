@@ -8,7 +8,6 @@ import Stack from '@mui/material/Stack';
 
 import "./Chat.css";
 import ChatBubble from '../chatBubble/ChatBubble';
-import {ChatMessageDto} from '../../model/ChatMessageDto.js';
 
 
 function Chat() {
@@ -17,8 +16,8 @@ function Chat() {
     const webSocket = useRef(null);
 
     const [chatBubbles, setChatBubbles] = useState([
-        new ChatMessageDto("Oscar", "I am a chat bot. What do you want me to do?")
-          ]);
+      // {author: "Oscar", text: "What do you want me to do now?"}
+    ]);
  
     const [inputMessage, setInputMessage] = useState(
       {author: "You", text: ""}
@@ -26,8 +25,9 @@ function Chat() {
 
     //create webSocket object and connection
     useEffect(() => {
-    console.log("Opening websocket...");
     webSocket.current = new WebSocket("ws://zoozl.net:1601/");
+    console.log("Opening websocket...");
+
     webSocket.onopen = (event) => {
       console.log("Open:", event);
     }
@@ -42,11 +42,11 @@ function Chat() {
 
   useEffect(() => {
     webSocket.current.onmessage = (event) => {
-      const receivedMessageDto = JSON.parse(event.data);
-      console.log("Received message: ", receivedMessageDto);
+      const receivedMessage = JSON.parse(event.data);
+      console.log("Received message: ", receivedMessage);
       setChatBubbles([...chatBubbles, {
-        author: receivedMessageDto.author,
-        text: receivedMessageDto.text
+        author: receivedMessage.author,
+        text: receivedMessage.text
       }]);
     }
       if (scrollBottomRef.current) {
@@ -63,7 +63,7 @@ function Chat() {
       const sendMessage = (event) => {
         event.preventDefault();
         if (inputMessage.text) {
-            webSocket.current.send(JSON.stringify(new ChatMessageDto(inputMessage)));
+            webSocket.current.send(JSON.stringify(inputMessage));
             console.log("Sending message...", inputMessage);
             setChatBubbles([...chatBubbles, {
               author: inputMessage.author,
@@ -79,7 +79,7 @@ function Chat() {
           event.preventDefault(); //this code prevents default behaviour of enter key: creation of next line
           
         if (inputMessage.text) {
-            webSocket.current.send(JSON.stringify(new ChatMessageDto(inputMessage)));
+            webSocket.current.send(JSON.stringify(inputMessage));
             console.log("Sending message...", inputMessage);
             setChatBubbles([...chatBubbles, {
               author: inputMessage.author,
@@ -89,13 +89,13 @@ function Chat() {
         }
         }}
 
-        const createChatBubbles = chatBubbles.map((chatMessageDto, index) => 
+        const createChatBubbles = chatBubbles.map((chatMessage, index) => 
               <ChatBubble
                 key={index}
-                author={chatMessageDto.author}
-                text={chatMessageDto.text}
-                color={(chatMessageDto.author === "You") ? "#69f0ae" : "#d9edfd"}
-                justifyContent={(chatMessageDto.author === "You") ? "flex-end" : "flex-start"}
+                author={chatMessage.author}
+                text={chatMessage.text}
+                color={(chatMessage.author === "You") ? "#69f0ae" : "#d9edfd"}
+                justifyContent={(chatMessage.author === "You") ? "flex-end" : "flex-start"}
               />
         );
           
