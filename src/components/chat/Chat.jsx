@@ -25,7 +25,7 @@ function Chat() {
 
     //create webSocket object and connection
     useEffect(() => {
-    webSocket.current = new WebSocket("ws://zoozl.net:1601/");
+    webSocket.current = new WebSocket("wss://zoozl.net:1602/");
     console.log("Opening websocket...");
 
     webSocket.onopen = (event) => {
