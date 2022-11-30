@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid";
 import "./App.css";
 import background from "../../images/robot-picture2.jpg"
 import Chat from '../chat/Chat.jsx';
+import AboutBlock from '../aboutBlock/AboutBlock.jsx';
 import Footer from '../footer/Footer.jsx';
 
 export default function App() {
@@ -19,8 +20,8 @@ export default function App() {
         <Grid item md={2}></Grid>
         <Grid item xs={12} md={10} paddingLeft={1} paddingTop={5}>
           <div className='top-headers'>
-          <h1>Hello, my name is Oscar. I can be your personal bot.</h1>
-          <p>I can work as your accountant or secretary. I can be anything. Just ask.</p>
+          <h1>Get your own personal <span className='h1-important'>chatbot</span></h1>
+          <h3>It can work as your accountant or secretary. It can play games. It can do many things.</h3>
           </div>
 
         <Chat />
@@ -28,6 +29,7 @@ export default function App() {
         </Grid>
       </Grid>
     </div>
+    <AboutBlock />
     <Footer />
     </Fragment>  
     );

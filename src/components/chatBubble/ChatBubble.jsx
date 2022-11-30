@@ -17,6 +17,8 @@ export default function ChatBubble(props) {
                         opacity: 1,
                         padding: 0.7,
                         marginBottom: "10px",
+                        maxWidth: "70%",
+                        minWidth: "30%",
                     }}
                     >
                     <h6>{props.author}</h6>

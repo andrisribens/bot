@@ -107,6 +107,7 @@ function Chat() {
             sx={{
               width: "370px",
               maxWidth: "98%",
+              minWidth: "320px",	
               height: "420px",
               backgroundColor: "rgb(0,0,0,0.5)"
             }}
@@ -135,7 +136,7 @@ function Chat() {
                                     alignItems="flex-end"
                                 >
                                     <TextField
-                                        focused
+                                        // focused
                                         multiline
                                         name="text"
                                         value={inputMessage.text}
@@ -145,6 +146,7 @@ function Chat() {
                                         sx={{
                                         width:"95%",
                                         backgroundColor: "white", 
+                                        borderRadius: "4px",
                                         }}
                                     />
                                     <Button 
@@ -152,7 +154,7 @@ function Chat() {
                                         type="submit" 
                                         variant="contained" 
                                         size='large' 
-                                        sx={{height:"55px"}}>
+                                        sx={{height:"56px"}}>
                                         <SendIcon />
                                     </Button>    
                                 </Stack>

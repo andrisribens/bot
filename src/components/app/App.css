@@ -2,6 +2,31 @@ body {
     text-align: center;
     margin: 0;   
     background-color: #1F1524;
+    min-width: 350px;
+}
+
+h1 {
+    font-family: 'Audiowide', cursive;
+    font-size: 3.5rem;
+    margin-block-end: 0.5rem;
+/* font-family: 'Kdam Thmor Pro', sans-serif; */
+}
+
+h2 {
+    font-family: 'Audiowide', cursive;
+    font-size: 2.3rem;
+
+}
+
+h3 {
+/* font-family: 'Titillium Web', sans-serif; */
+font-size: 1.3rem;
+font-weight: 400;
+
+}
+
+.h1-important {
+    color: red;
 }
 
 .main-block {
@@ -9,7 +34,7 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: right;
-    height: 700px;  
+    height: 820px;  
     text-align: left;
 }
 
@@ -18,3 +43,4 @@ body {
     color: white;
     text-align: left;
 }
+
