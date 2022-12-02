@@ -1,0 +1,25 @@
+.contact-block {
+  background-color: white;
+  color: #1f1524;
+}
+
+.contact-block-content {
+  padding: 50px 0 80px;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+.large-contact-btn {
+  padding: 20px 40px;
+  background-color: #1f1524;
+  color: white;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  transition: transform 0.1s;
+  cursor: pointer;
+}
+
+.large-contact-btn:hover {
+  transform: scale(1.02);
+  background-color: #330033;
+}
