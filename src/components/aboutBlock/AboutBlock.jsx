@@ -21,7 +21,6 @@ export default function AboutBlock() {
               was born!"
             </h3>
             <Divider
-              // variant='middle'
               sx={{
                 width: '40%',
                 alignSelf: 'flex-end',

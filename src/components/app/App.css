@@ -20,7 +20,7 @@ h1 {
   }
 }
 
-@media only screen and (man-width: 1920px) {
+@media only screen and (min-width: 1920px) {
   h1 {
     font-size: 3.5rem;
   }
@@ -28,19 +28,19 @@ h1 {
 
 h2 {
   font-family: 'Audiowide', cursive;
-  font-size: 2.3rem;
-}
-
-@media only screen and (max-width: 420px) {
-  h2 {
-    font-size: 1.5rem;
-  }
+  font-size: 2.1rem;
 }
 
 h3 {
   /* font-family: 'Titillium Web', sans-serif; */
   font-size: 1.3rem;
   font-weight: 400;
+}
+
+@media only screen and (max-width: 420px) {
+  h3 {
+    font-size: 1rem;
+  }
 }
 
 .h1-important {
