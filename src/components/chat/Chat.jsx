@@ -49,10 +49,13 @@ function Chat() {
       ]);
     };
     if (endOfMessages.current) {
-      endOfMessages.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
+      endOfMessages.current.scrollIntoView(
+        //   {
+        //   behavior: 'smooth',
+        //   block: 'end',
+        // }
+        false
+      );
     }
   }, [chatBubbles]);
 
@@ -100,7 +103,7 @@ function Chat() {
       key={index}
       author={chatMessage.author}
       text={chatMessage.text}
-      color={chatMessage.author === 'You' ? '#69f0ae' : '#d9edfd'}
+      color={chatMessage.author === 'You' ? '#69f0ae' : '#d6e8f2'}
       justifyContent={chatMessage.author === 'You' ? 'flex-end' : 'flex-start'}
     />
   ));

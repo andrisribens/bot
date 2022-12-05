@@ -6,8 +6,7 @@ function Footer() {
   return (
     <div className="footer">
       <p>
-        Created by Andris Rībens (frontend) and Juris Kaminskis (backend) in
-        2022.
+        This website was created by Juris Kaminskis & Andris Rībens in 2022.
       </p>
     </div>
   );

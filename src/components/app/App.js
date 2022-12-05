@@ -17,7 +17,7 @@ export default function App() {
       >
         <Grid container>
           <Grid item md={2}></Grid>
-          <Grid item xs={12} md={10} paddingLeft={1} paddingTop={5}>
+          <Grid item xs={12} md={10} paddingLeft={1} paddingTop={1}>
             <div className="top-headers">
               <h1>
                 Get your own personal{' '}

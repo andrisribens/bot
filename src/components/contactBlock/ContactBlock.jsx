@@ -136,6 +136,7 @@ export default function ContactBlock() {
                 <button className="large-contact-btn" onClick={handleFormOpen}>
                   Send us a message
                 </button>
+                <p>If you want to get your personal chatbot</p>
               </Grid>
             )}
           </form>
