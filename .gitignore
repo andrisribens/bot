@@ -10,6 +10,7 @@
 
 # production
 /build
+/src/images/background.jpg
 
 # misc
 .DS_Store

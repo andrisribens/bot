@@ -21,8 +21,9 @@ function Chat() {
 
   //create webSocket object and connection
   useEffect(() => {
-    webSocket.current = new WebSocket('wss://zoozl.net:1602/');
-    console.log('Opening websocket...');
+    const address = process.env.WDS_SOCKET_HOST + ':' + process.env.WDS_SOCKET_PORT;
+    webSocket.current = new WebSocket('wss://' + address + '/');
+    //console.log('Opening websocket...');
 
     webSocket.onopen = (event) => {
       console.log('Open:', event);
@@ -39,7 +40,7 @@ function Chat() {
   useEffect(() => {
     webSocket.current.onmessage = (event) => {
       const receivedMessage = JSON.parse(event.data);
-      console.log('Received message: ', receivedMessage);
+      //console.log('Received message: ', receivedMessage);
       setChatBubbles((chatBubbles) => [
         ...chatBubbles,
         {
@@ -67,7 +68,7 @@ function Chat() {
     event.preventDefault();
     if (inputMessage.text) {
       webSocket.current.send(JSON.stringify(inputMessage));
-      console.log('Sending message...', inputMessage);
+      //console.log('Sending message...', inputMessage);
       setChatBubbles([
         ...chatBubbles,
         {

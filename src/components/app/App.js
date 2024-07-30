@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import Grid from '@mui/material/Grid';
 
 import './App.css';
-import background from '../../images/chatbot.jpg';
+import background from '../../images/background.jpg';
 import Chat from '../chat/Chat.jsx';
 import Footer from '../footer/Footer.jsx';
 
