@@ -1,7 +1,8 @@
 .footer {
     background-color: #1F1524;
     color:  #646B88;
-    text-align: right;
+    text-align: justify; /* Justifies the text */
+    text-align-last: right; /* Aligns the last line to the right */
     padding: 10px 10px 5px;
     font-size: 0.8rem;
 }
