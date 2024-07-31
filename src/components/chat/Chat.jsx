@@ -86,7 +86,7 @@ function Chat() {
 
       if (inputMessage.text) {
         webSocket.current.send(JSON.stringify(inputMessage));
-        console.log('Sending message...', inputMessage);
+        //console.log('Sending message...', inputMessage);
         setChatBubbles([
           ...chatBubbles,
           {
