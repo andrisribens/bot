@@ -49,6 +49,7 @@ h3 {
 
 .main-block {
   margin: -20px auto 0;
+  background-image: url('../../images/background.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: right;
