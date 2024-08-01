@@ -11,6 +11,8 @@
 # production
 /build
 /src/images/background.jpg
+/kolumbs
+/zoozl
 
 # misc
 .DS_Store
