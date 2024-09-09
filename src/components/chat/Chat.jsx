@@ -9,107 +9,120 @@ import Stack from '@mui/material/Stack';
 import './Chat.css';
 import ChatBubble from '../chatBubble/ChatBubble';
 
+
 function Chat() {
-  const endOfMessages = useRef(null);
-  const webSocket = useRef(null);
+    const endOfMessages = useRef(null);
+    const [chatBubbles, setChatBubbles] = useState([]);
+    const [inputMessage, setInputMessage] = useState({ author: 'You', text: '' });
+    // Track connections
+    const [connCount, setConnCount] = useState(1); 
+    // Track connection object
+    const ws = useRef(null);
+    let host = process.env.WDS_SOCKET_HOST;
+    let port = process.env.WDS_SOCKET_PORT;
+    let url = 'wss://' + host + ':' + port;
 
-  const [chatBubbles, setChatBubbles] = useState([
-    // {author: "Oscar", text: "What do you want me to do now?"}
-  ]);
-
-  const [inputMessage, setInputMessage] = useState({ author: 'You', text: '' });
-
-  //create webSocket object and connection
-  useEffect(() => {
-    const address = process.env.WDS_SOCKET_HOST + ':' + process.env.WDS_SOCKET_PORT;
-    webSocket.current = new WebSocket('wss://' + address + '/');
-    //console.log('Opening websocket...');
-
-    webSocket.onopen = (event) => {
-      console.log('Open:', event);
-    };
-    webSocket.onclose = (event) => {
-      console.log('Close:', event);
-    };
-    return () => {
-      console.log('Not closing webSocket...');
-      // webSocket.current.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    webSocket.current.onmessage = (event) => {
-      const receivedMessage = JSON.parse(event.data);
-      //console.log('Received message: ', receivedMessage);
-      setChatBubbles((chatBubbles) => [
-        ...chatBubbles,
-        {
-          author: receivedMessage.author,
-          text: receivedMessage.text,
-        },
-      ]);
-    };
-    if (endOfMessages.current) {
-      endOfMessages.current.scrollIntoView(
-        //   {
-        //   behavior: 'smooth',
-        //   block: 'end',
-        // }
-        false
-      );
-    }
-  }, [chatBubbles]);
-
-  function handleMessageChange(event) {
-    setInputMessage({ author: 'You', text: event.target.value });
-  }
-
-  const sendMessage = (event) => {
-    event.preventDefault();
-    if (inputMessage.text) {
-      webSocket.current.send(JSON.stringify(inputMessage));
-      //console.log('Sending message...', inputMessage);
-      setChatBubbles([
-        ...chatBubbles,
-        {
-          author: inputMessage.author,
-          text: inputMessage.text,
-        },
-      ]);
-      setInputMessage({ author: 'You', text: '' });
-    }
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault(); //this code prevents default behaviour of enter key: creation of next line
-
-      if (inputMessage.text) {
-        webSocket.current.send(JSON.stringify(inputMessage));
-        //console.log('Sending message...', inputMessage);
-        setChatBubbles([
-          ...chatBubbles,
-          {
-            author: inputMessage.author,
-            text: inputMessage.text,
-          },
+    //create webSocket object and connection on each render
+    useEffect(() => {
+        ws.current = new WebSocket(url);
+        ws.current.onerror = (error) => {
+            if (connCount === 1) {
+                alert("Connection server failure");
+            } else {
+                alert("Connection error. Try again.");
+            }
+        };
+        ws.current.onmessage = (event) => {
+            const receivedMessage = JSON.parse(event.data);
+            setChatBubbles((chatBubbles) => [
+                ...chatBubbles,
+            {
+                author: receivedMessage.author,
+                text: receivedMessage.text,
+            },
         ]);
-        setInputMessage({ author: 'You', text: '' });
-      }
-    }
-  };
+        };
+        return () => {
+            if (ws.current.readyState !== ws.current.CONNECTING) {
+                ws.current.close();
+            }
+        };
+    }, [connCount, url]);
+  
+    useEffect(() => {
+        if (endOfMessages.current) {
+            endOfMessages.current.scrollIntoView(
+                false
+        );
+        }
+    }, [chatBubbles]);
 
-  const createChatBubbles = chatBubbles.map((chatMessage, index) => (
-    <ChatBubble
-      key={index}
-      author={chatMessage.author}
-      text={chatMessage.text}
-      color={chatMessage.author === 'You' ? '#69f0ae' : '#d6e8f2'}
-      justifyContent={chatMessage.author === 'You' ? 'flex-end' : 'flex-start'}
-    />
-  ));
+    function handleMessageChange(event) {
+        setInputMessage({ author: 'You', text: event.target.value });
+    };
 
-  return (
+    function sendToServer(message) {
+        /*
+         * Try to send the message to backend
+         *
+         * @param {object} message - containing author and text
+         *
+         * When connection is not OPEN, try to reinitialise connection
+        */
+        message.sent = false;
+        if (ws.current.readyState !== ws.current.OPEN) { 
+            setConnCount(connCount + 1);
+        }
+        let sender = setInterval(() => {
+            if (ws.current.readyState === ws.current.OPEN) { 
+                if (message.sent === false) {
+                    ws.current.send(JSON.stringify(message));
+                    setChatBubbles([
+                      ...chatBubbles,
+                      {
+                        author: message.author,
+                        text: message.text,
+                      },
+                    ]);
+                    message.sent = true;
+                }
+            }
+        }, 100);
+        setTimeout(() => {clearInterval(sender); }, 1000);
+    };
+
+    function sendMessage(event) {
+        // Prevent reload of the page upon form submit
+        event.preventDefault();
+        if (inputMessage.text) {
+            sendToServer(inputMessage);
+            setInputMessage({ author: 'You', text: '' });
+        }
+    };
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            //this code prevents default behaviour of enter key: creation of next line
+            event.preventDefault();
+            if (inputMessage.text) {
+                sendToServer(inputMessage);
+            setInputMessage({ author: 'You', text: '' });
+            }
+        }
+    };
+
+
+    const createChatBubbles = chatBubbles.map((chatMessage, index) => (
+        <ChatBubble
+            key={index}
+            author={chatMessage.author}
+            text={chatMessage.text}
+            color={chatMessage.author === 'You' ? '#69f0ae' : '#d6e8f2'}
+            justifyContent={chatMessage.author === 'You' ? 'flex-end' : 'flex-start'}
+        />
+    ));
+
+    return (
     <Fragment>
       <Paper
         elevation={7}
@@ -146,7 +159,7 @@ function Chat() {
                   name="text"
                   value={inputMessage.text}
                   onChange={handleMessageChange}
-                  onKeyPress={(event) => handleKeyPress(event)}
+                  onKeyPress={handleKeyPress}
                   placeholder="Write something"
                   sx={{
                     width: '95%',
