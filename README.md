@@ -11,3 +11,8 @@ WDS_SOCKET_PORT - port of the websocket server
 ```bash
 WDS_SOCKET_HOST=localhost WDS_SOCKET_PORT=8080 npm run build
 ```
+
+## Run locally server
+```bash
+serve -s build
+```
