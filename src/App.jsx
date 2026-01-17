@@ -36,7 +36,6 @@ function App() {
 
         {isAuthenticated ? (
           <div className="logged-in-section">
-            <div className="logged-in-message">✅ Successfully authenticated!</div>
             <h2 className="profile-section-title">Your Profile</h2>
             <div className="profile-card">
               <Profile />
