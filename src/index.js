@@ -10,6 +10,12 @@ const domain =
 const clientId =
   process.env.REACT_APP_AUTH0_CLIENT_ID ||
   (typeof import.meta !== 'undefined' ? import.meta.env.VITE_AUTH0_CLIENT_ID : undefined);
+const redirectPath =
+  process.env.REACT_APP_AUTH0_REDIRECT_PATH ||
+  (typeof import.meta !== 'undefined'
+    ? import.meta.env.VITE_AUTH0_REDIRECT_PATH
+    : undefined) ||
+  '';
 
 if (!domain || !clientId) {
   console.error('Auth0 configuration missing. Please check your .env file.');
@@ -42,7 +48,10 @@ root.render(
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: window.location.origin,
+        redirect_uri: new URL(
+          redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`,
+          window.location.origin
+        ).toString(),
       }}
     >
       <App />
