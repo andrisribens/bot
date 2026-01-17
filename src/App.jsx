@@ -31,7 +31,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="main-card-wrapper">
-        <h1 className="main-title">Welcome to Sample0</h1>
+        <h1 className="main-title">Welcome to messaging</h1>
 
         {isAuthenticated ? (
           <div className="logged-in-section">
