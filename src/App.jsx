@@ -2,6 +2,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import LoginButton from './LoginButton.jsx';
 import LogoutButton from './LogoutButton.jsx';
 import Profile from './Profile.jsx';
+import Chat from './components/chat/Chat.jsx';
 
 function App() {
   const { isAuthenticated, isLoading, error } = useAuth0();
@@ -40,6 +41,7 @@ function App() {
             <div className="profile-card">
               <Profile />
             </div>
+            <Chat />
             <LogoutButton />
           </div>
         ) : (
