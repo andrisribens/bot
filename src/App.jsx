@@ -137,7 +137,7 @@ function App() {
                       <th>lietotājs</th>
                       <th>pieprasījums</th>
                       <th>atbilde</th>
-                      <th>status</th>
+                      <th>statuss</th>
                     </tr>
                   </thead>
                   <tbody>
