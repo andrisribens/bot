@@ -13,11 +13,11 @@ const getSocketUrl = () => {
 };
 
 export const WebSocketProvider = ({ children }) => {
-  const { getIdTokenClaims } = useAuth0();
+  const { getIdTokenClaims, isAuthenticated } = useAuth0();
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef(null);
   const authSentRef = useRef(false);
-  const readyPromiseRef = useRef(null);
+  const openPromiseRef = useRef(null);
   const listenersRef = useRef(new Set());
   const socketUrl = getSocketUrl();
 
@@ -27,6 +27,9 @@ export const WebSocketProvider = ({ children }) => {
     }
     if (authSentRef.current) {
       return true;
+    }
+    if (!isAuthenticated) {
+      return false;
     }
     try {
       const claims = await getIdTokenClaims();
@@ -50,11 +53,10 @@ export const WebSocketProvider = ({ children }) => {
     const ws = new WebSocket(socketUrl);
     socketRef.current = ws;
     authSentRef.current = false;
-    readyPromiseRef.current = new Promise((resolve) => {
-      ws.onopen = async () => {
-        const authed = await sendAuthFrame();
+    openPromiseRef.current = new Promise((resolve) => {
+      ws.onopen = () => {
         setIsConnected(true);
-        resolve(authed);
+        resolve(true);
       };
       ws.onerror = () => {
         resolve(false);
@@ -71,12 +73,25 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, [socketUrl, sendAuthFrame]);
 
+  useEffect(() => {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    if (!authSentRef.current) {
+      sendAuthFrame();
+    }
+  }, [isAuthenticated, sendAuthFrame]);
+
   const sendJson = useCallback(async (payload) => {
-    if (!socketRef.current || !readyPromiseRef.current) {
+    if (!socketRef.current || !openPromiseRef.current) {
       return false;
     }
-    const ready = await readyPromiseRef.current;
+    const ready = await openPromiseRef.current;
     if (!ready) {
+      return false;
+    }
+    const authed = await sendAuthFrame();
+    if (!authed) {
       return false;
     }
     try {
@@ -86,7 +101,7 @@ export const WebSocketProvider = ({ children }) => {
       console.error('Failed to send websocket payload.', err);
       return false;
     }
-  }, []);
+  }, [sendAuthFrame]);
 
   const subscribe = useCallback((handler) => {
     listenersRef.current.add(handler);
