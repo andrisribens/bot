@@ -12,8 +12,11 @@ function App() {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
   const [requestsError, setRequestsError] = useState(null);
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [requestsTotalCount, setRequestsTotalCount] = useState(0);
   const requestsSocket = useRef(null);
   const requestsAuthSentRef = useRef(false);
+  const requestsPageSize = 10;
   const socketHost = process.env.WDS_SOCKET_HOST;
   const socketPort = process.env.WDS_SOCKET_PORT;
   const socketUrl = socketHost && socketPort ? `wss://${socketHost}:${socketPort}` : null;
@@ -41,6 +44,9 @@ function App() {
       }
       const records = extractRequests(payload);
       setRequests(records);
+      setRequestsTotalCount(
+        Number.isFinite(payload.total_count) ? payload.total_count : 0
+      );
       setRequestsLoading(false);
     } catch (err) {
       setRequestsError('Neizdevās ielādēt pieprasījumus.');
@@ -68,7 +74,7 @@ function App() {
     }
   };
 
-  const requestMessages = () => {
+  const requestMessages = (page = 1) => {
     if (!socketUrl) {
       setRequestsError('Trūkst WebSocket konfigurācijas.');
       setRequestsLoading(false);
@@ -95,8 +101,8 @@ function App() {
       const payload = {
         author: user?.name || 'You',
         operation: 'list_messages',
-        page: 1,
-        page_size: 10,
+        page,
+        page_size: requestsPageSize,
       };
       requestsSocket.current.send(JSON.stringify(payload));
     };
@@ -183,6 +189,46 @@ function App() {
                 {requestsError ? (
                   <div className="requests-status error">{requestsError}</div>
                 ) : null}
+                <div className="requests-footer">
+                  <div className="requests-total">Kopā: {requestsTotalCount}</div>
+                  <div className="requests-pagination">
+                    <button
+                      type="button"
+                      className="button requests pagination"
+                      onClick={() => {
+                        const nextPage = Math.max(1, requestsPage - 1);
+                        setRequestsPage(nextPage);
+                        requestMessages(nextPage);
+                      }}
+                      disabled={requestsLoading || requestsPage <= 1}
+                    >
+                      Iepriekšējā
+                    </button>
+                    <button
+                      type="button"
+                      className="button requests pagination"
+                      onClick={() => {
+                        const maxPage = Math.max(
+                          1,
+                          Math.ceil(requestsTotalCount / requestsPageSize)
+                        );
+                        const nextPage = Math.min(maxPage, requestsPage + 1);
+                        setRequestsPage(nextPage);
+                        requestMessages(nextPage);
+                      }}
+                      disabled={
+                        requestsLoading ||
+                        requestsPage >=
+                          Math.max(
+                            1,
+                            Math.ceil(requestsTotalCount / requestsPageSize)
+                          )
+                      }
+                    >
+                      Nākamā
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : null}
             <div className="action-buttons">
@@ -202,7 +248,8 @@ function App() {
                 onClick={() => {
                   setShowRequests(true);
                   setShowChat(false);
-                  requestMessages();
+                  setRequestsPage(1);
+                  requestMessages(1);
                 }}
               >
                 PIEPRASĪJUMI
