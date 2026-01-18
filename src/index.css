@@ -164,6 +164,17 @@ body {
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
 }
 
+.button.requests {
+  background-color: #f6ad55;
+  color: #1a1e27;
+}
+
+.button.requests:hover {
+  background-color: #ed8936;
+  transform: translateY(-5px) scale(1.03);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
 .logged-in-section {
   display: flex;
   flex-direction: column;
@@ -187,6 +198,45 @@ body {
 .profile-card {
   padding: 2.2rem;
   animation: scaleIn 0.8s ease-out forwards 1.2s;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.requests-table-wrapper {
+  width: 100%;
+  max-width: 720px;
+  background-color: #2d313c;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  overflow-x: auto;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.requests-table th,
+.requests-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.requests-table th {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+  color: #fbd38d;
 }
 
 .profile-picture {
