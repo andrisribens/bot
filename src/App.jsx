@@ -29,26 +29,7 @@ function App() {
     if (!payload || typeof payload !== 'object') {
       return [];
     }
-    if (Array.isArray(payload)) {
-      return payload;
-    }
-    if (Array.isArray(payload.messages)) {
-      return payload.messages;
-    }
-    if (Array.isArray(payload.items)) {
-      return payload.items;
-    }
-    if (Array.isArray(payload.data)) {
-      return payload.data;
-    }
-    if (Array.isArray(payload.results)) {
-      return payload.results;
-    }
-    if (Array.isArray(payload.list)) {
-      return payload.list;
-    }
-    const fallbackList = Object.values(payload).find((value) => Array.isArray(value));
-    return Array.isArray(fallbackList) ? fallbackList : [];
+    return Array.isArray(payload.data) ? payload.data : [];
   };
 
   const handleRequestsMessage = (event) => {
