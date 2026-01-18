@@ -8,6 +8,7 @@ import Chat from './components/chat/Chat.jsx';
 function App() {
   const { isAuthenticated, isLoading, error } = useAuth0();
   const [showRequests, setShowRequests] = useState(false);
+  const [showChat, setShowChat] = useState(true);
 
   if (isLoading) {
     return (
@@ -38,20 +39,30 @@ function App() {
 
         {isAuthenticated ? (
           <div className="logged-in-section">
-            <div className="profile-card">
-              <Profile />
-            </div>
-            <Chat />
             <div className="action-buttons">
               <button
                 type="button"
                 className="button requests"
-                onClick={() => setShowRequests((visible) => !visible)}
+                onClick={() => {
+                  setShowRequests(true);
+                  setShowChat(false);
+                }}
               >
                 PIEPRASĪJUMI
               </button>
+              <button
+                type="button"
+                className="button chat"
+                onClick={() => {
+                  setShowChat(true);
+                  setShowRequests(false);
+                }}
+              >
+                Čats
+              </button>
               <LogoutButton />
             </div>
+            {showChat ? <Chat /> : null}
             {showRequests ? (
               <div className="requests-table-wrapper">
                 <table className="requests-table">
@@ -68,6 +79,9 @@ function App() {
                 </table>
               </div>
             ) : null}
+            <div className="profile-card">
+              <Profile />
+            </div>
           </div>
         ) : (
           <div className="action-card">
