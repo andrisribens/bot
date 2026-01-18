@@ -22,7 +22,7 @@ const LogoutButton = () => {
       }
       className="button logout"
     >
-      Log Out
+      IZIET
     </button>
   );
 };

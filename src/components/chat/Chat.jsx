@@ -160,7 +160,7 @@ function Chat() {
                   value={inputMessage.text}
                   onChange={handleMessageChange}
                   onKeyPress={handleKeyPress}
-                  placeholder="Write something"
+                  placeholder="Raksti šeit"
                   sx={{
                     width: '95%',
                     backgroundColor: 'white',
@@ -168,7 +168,7 @@ function Chat() {
                   }}
                 />
                 <Button
-                  aria-label="Send Message"
+                  aria-label="Sūtīt ziņu"
                   type="submit"
                   variant="contained"
                   size="large"
