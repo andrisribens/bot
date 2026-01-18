@@ -69,23 +69,22 @@ function Chat() {
          *
          * When connection is not OPEN, try to reinitialise connection
         */
-        const payload = {
-            author: message.author,
-            text: message.text,
-        };
-        let sent = false;
+        message.sent = false;
         if (ws.current.readyState !== ws.current.OPEN) { 
             setConnCount(connCount + 1);
         }
         let sender = setInterval(() => {
             if (ws.current.readyState === ws.current.OPEN) { 
-                if (!sent) {
-                    ws.current.send(JSON.stringify(payload));
-                    setChatBubbles((currentBubbles) => [
-                      ...currentBubbles,
-                      payload,
+                if (message.sent === false) {
+                    ws.current.send(JSON.stringify(message));
+                    setChatBubbles([
+                      ...chatBubbles,
+                      {
+                        author: message.author,
+                        text: message.text,
+                      },
                     ]);
-                    sent = true;
+                    message.sent = true;
                 }
             }
         }, 100);
