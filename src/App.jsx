@@ -6,13 +6,14 @@ import Profile from './Profile.jsx';
 import Chat from './components/chat/Chat.jsx';
 
 function App() {
-  const { isAuthenticated, isLoading, error, user } = useAuth0();
+  const { isAuthenticated, isLoading, error, user, getIdTokenClaims } = useAuth0();
   const [showRequests, setShowRequests] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(false);
   const [requestsError, setRequestsError] = useState(null);
   const requestsSocket = useRef(null);
+  const requestsAuthSentRef = useRef(false);
   const socketHost = process.env.WDS_SOCKET_HOST;
   const socketPort = process.env.WDS_SOCKET_PORT;
   const socketUrl = socketHost && socketPort ? `wss://${socketHost}:${socketPort}` : null;
@@ -47,6 +48,26 @@ function App() {
     }
   };
 
+  const sendRequestsAuthFrame = async () => {
+    if (!requestsSocket.current || requestsSocket.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    if (requestsAuthSentRef.current) {
+      return;
+    }
+    try {
+      const claims = await getIdTokenClaims();
+      const token = claims?.__raw;
+      if (!token) {
+        return;
+      }
+      requestsSocket.current.send(JSON.stringify({ auth: { token } }));
+      requestsAuthSentRef.current = true;
+    } catch (err) {
+      console.error('Failed to attach auth token for requests websocket.', err);
+    }
+  };
+
   const requestMessages = () => {
     if (!socketUrl) {
       setRequestsError('Trūkst WebSocket konfigurācijas.');
@@ -57,13 +78,20 @@ function App() {
     setRequestsLoading(true);
     if (!requestsSocket.current || requestsSocket.current.readyState === WebSocket.CLOSED) {
       requestsSocket.current = new WebSocket(socketUrl);
+      requestsAuthSentRef.current = false;
       requestsSocket.current.onmessage = handleRequestsMessage;
       requestsSocket.current.onerror = () => {
         setRequestsError('Neizdevās ielādēt pieprasījumus.');
         setRequestsLoading(false);
       };
     }
-    const sendPayload = () => {
+    const sendPayload = async () => {
+      await sendRequestsAuthFrame();
+      if (!requestsAuthSentRef.current) {
+        setRequestsError('Trūkst autentifikācijas žetona.');
+        setRequestsLoading(false);
+        return;
+      }
       const payload = {
         author: user?.name || 'You',
         operation: 'list_messages',
