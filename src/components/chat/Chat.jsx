@@ -1,5 +1,4 @@
 import React, { Fragment, useState, useRef, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import Box from '@mui/system/Box';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
@@ -9,55 +8,38 @@ import Stack from '@mui/material/Stack';
 
 import './Chat.css';
 import ChatBubble from '../chatBubble/ChatBubble';
+import { useWebSocket } from '../websocket/WebSocketContext.jsx';
 
 
 function Chat() {
-    const { getIdTokenClaims } = useAuth0();
+    const { sendJson, subscribe } = useWebSocket();
     const endOfMessages = useRef(null);
     const [chatBubbles, setChatBubbles] = useState([]);
     const [inputMessage, setInputMessage] = useState({ author: 'You', text: '' });
-    // Track connections
-    const [connCount, setConnCount] = useState(1); 
-    // Track connection object
-    const ws = useRef(null);
-    const authSentRef = useRef(false);
-    let host = process.env.WDS_SOCKET_HOST;
-    let port = process.env.WDS_SOCKET_PORT;
-    let url = 'wss://' + host + ':' + port;
 
-    //create webSocket object and connection on each render
     useEffect(() => {
-        ws.current = new WebSocket(url);
-        authSentRef.current = false;
-        ws.current.onerror = (error) => {
-            if (connCount === 1) {
-                alert("Connection server failure");
-            } else {
-                alert("Connection error. Try again.");
+        const unsubscribe = subscribe((event) => {
+            try {
+                const receivedMessage = JSON.parse(event.data);
+                if (receivedMessage.operation || receivedMessage.auth) {
+                    return;
+                }
+                if (!receivedMessage.text) {
+                    return;
+                }
+                setChatBubbles((chatBubbles) => [
+                    ...chatBubbles,
+                    {
+                        author: receivedMessage.author,
+                        text: receivedMessage.text,
+                    },
+                ]);
+            } catch (err) {
+                console.error('Failed to parse chat message.', err);
             }
-        };
-        ws.current.onopen = () => {
-            sendAuthFrame();
-        };
-        ws.current.onmessage = (event) => {
-            const receivedMessage = JSON.parse(event.data);
-            if (receivedMessage.operation) {
-                return;
-            }
-            setChatBubbles((chatBubbles) => [
-                ...chatBubbles,
-            {
-                author: receivedMessage.author,
-                text: receivedMessage.text,
-            },
-        ]);
-        };
-        return () => {
-            if (ws.current.readyState !== ws.current.CONNECTING) {
-                ws.current.close();
-            }
-        };
-    }, [connCount, url]);
+        });
+        return unsubscribe;
+    }, [subscribe]);
   
     useEffect(() => {
         if (endOfMessages.current) {
@@ -83,47 +65,15 @@ function Chat() {
             author: message.author,
             text: message.text,
         };
-        let sent = false;
-        if (ws.current.readyState !== ws.current.OPEN) { 
-            setConnCount(connCount + 1);
-        }
-        let sender = setInterval(() => {
-            if (ws.current.readyState === ws.current.OPEN) { 
-                if (!sent) {
-                    if (!authSentRef.current) {
-                        sendAuthFrame();
-                        return;
-                    }
-                    ws.current.send(JSON.stringify(payload));
-                    setChatBubbles((currentBubbles) => [
-                      ...currentBubbles,
-                      payload,
-                    ]);
-                    sent = true;
-                }
-            }
-        }, 100);
-        setTimeout(() => {clearInterval(sender); }, 1000);
-    };
-
-    const sendAuthFrame = async () => {
-        if (!ws.current || ws.current.readyState !== ws.current.OPEN) {
-            return;
-        }
-        if (authSentRef.current) {
-            return;
-        }
-        try {
-            const claims = await getIdTokenClaims();
-            const token = claims?.__raw;
-            if (!token) {
+        sendJson(payload).then((sent) => {
+            if (!sent) {
                 return;
             }
-            ws.current.send(JSON.stringify({ auth: { token } }));
-            authSentRef.current = true;
-        } catch (err) {
-            console.error('Failed to attach auth token for chat websocket.', err);
-        }
+            setChatBubbles((currentBubbles) => [
+              ...currentBubbles,
+              payload,
+            ]);
+        });
     };
 
     function sendMessage(event) {
