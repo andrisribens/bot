@@ -125,7 +125,7 @@ body {
 }
 
 .button {
-  padding: 1.1rem 2.8rem;
+  padding: 0.8rem 1.6rem;
   font-size: 1.2rem;
   font-weight: 600;
   border-radius: 10px;
@@ -134,7 +134,7 @@ body {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   outline: none;
 }
 
