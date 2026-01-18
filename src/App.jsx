@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import LoginButton from './LoginButton.jsx';
 import LogoutButton from './LogoutButton.jsx';
 import Profile from './Profile.jsx';
 import Chat from './components/chat/Chat.jsx';
-import { useWebSocket } from './components/websocket/WebSocketContext.jsx';
 
 function App() {
-  const { isAuthenticated, isLoading, error, user } = useAuth0();
-  const { sendJson, subscribe, isConnected } = useWebSocket();
+  const { isAuthenticated, isLoading, error, user, getIdTokenClaims } = useAuth0();
   const [showRequests, setShowRequests] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const [requests, setRequests] = useState([]);
@@ -16,28 +14,20 @@ function App() {
   const [requestsError, setRequestsError] = useState(null);
   const [requestsPage, setRequestsPage] = useState(1);
   const [requestsTotalCount, setRequestsTotalCount] = useState(0);
+  const requestsSocket = useRef(null);
+  const requestsAuthSentRef = useRef(false);
   const requestsPageSize = 10;
+  const socketHost = process.env.WDS_SOCKET_HOST;
+  const socketPort = process.env.WDS_SOCKET_PORT;
+  const socketUrl = socketHost && socketPort ? `wss://${socketHost}:${socketPort}` : null;
 
   useEffect(() => {
-    const unsubscribe = subscribe((event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.operation !== 'list_messages') {
-          return;
-        }
-        const records = extractRequests(payload);
-        setRequests(records);
-        setRequestsTotalCount(
-          Number.isFinite(payload.total_count) ? payload.total_count : 0
-        );
-        setRequestsLoading(false);
-      } catch (err) {
-        setRequestsError('Neizdevās ielādēt pieprasījumus.');
-        setRequestsLoading(false);
+    return () => {
+      if (requestsSocket.current && requestsSocket.current.readyState !== WebSocket.CLOSED) {
+        requestsSocket.current.close();
       }
-    });
-    return unsubscribe;
-  }, [subscribe]);
+    };
+  }, []);
 
   const extractRequests = (payload) => {
     if (!payload || typeof payload !== 'object') {
@@ -46,23 +36,81 @@ function App() {
     return Array.isArray(payload.data) ? payload.data : [];
   };
 
+  const handleRequestsMessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.operation !== 'list_messages') {
+        return;
+      }
+      const records = extractRequests(payload);
+      setRequests(records);
+      setRequestsTotalCount(
+        Number.isFinite(payload.total_count) ? payload.total_count : 0
+      );
+      setRequestsLoading(false);
+    } catch (err) {
+      setRequestsError('Neizdevās ielādēt pieprasījumus.');
+      setRequestsLoading(false);
+    }
+  };
+
+  const sendRequestsAuthFrame = async () => {
+    if (!requestsSocket.current || requestsSocket.current.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    if (requestsAuthSentRef.current) {
+      return;
+    }
+    try {
+      const claims = await getIdTokenClaims();
+      const token = claims?.__raw;
+      if (!token) {
+        return;
+      }
+      requestsSocket.current.send(JSON.stringify({ auth: { token } }));
+      requestsAuthSentRef.current = true;
+    } catch (err) {
+      console.error('Failed to attach auth token for requests websocket.', err);
+    }
+  };
+
   const requestMessages = (page = 1) => {
+    if (!socketUrl) {
+      setRequestsError('Trūkst WebSocket konfigurācijas.');
+      setRequestsLoading(false);
+      return;
+    }
     setRequestsError(null);
     setRequestsLoading(true);
-    const payload = {
-      author: user?.name || 'You',
-      operation: 'list_messages',
-      page,
-      page_size: requestsPageSize,
-    };
-    sendJson(payload).then((sent) => {
-      if (!sent) {
-        setRequestsError(
-          isConnected ? 'Trūkst autentifikācijas žetona.' : 'Nav WebSocket savienojuma.'
-        );
+    if (!requestsSocket.current || requestsSocket.current.readyState === WebSocket.CLOSED) {
+      requestsSocket.current = new WebSocket(socketUrl);
+      requestsAuthSentRef.current = false;
+      requestsSocket.current.onmessage = handleRequestsMessage;
+      requestsSocket.current.onerror = () => {
+        setRequestsError('Neizdevās ielādēt pieprasījumus.');
         setRequestsLoading(false);
+      };
+    }
+    const sendPayload = async () => {
+      await sendRequestsAuthFrame();
+      if (!requestsAuthSentRef.current) {
+        setRequestsError('Trūkst autentifikācijas žetona.');
+        setRequestsLoading(false);
+        return;
       }
-    });
+      const payload = {
+        author: user?.name || 'You',
+        operation: 'list_messages',
+        page,
+        page_size: requestsPageSize,
+      };
+      requestsSocket.current.send(JSON.stringify(payload));
+    };
+    if (requestsSocket.current.readyState === WebSocket.OPEN) {
+      sendPayload();
+    } else {
+      requestsSocket.current.onopen = sendPayload;
+    }
   };
 
   const formatRequestDate = (value) => {

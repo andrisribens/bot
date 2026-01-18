@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { Auth0Provider } from '@auth0/auth0-react';
 import './index.css';
 import App from './App.jsx';
-import { WebSocketProvider } from './components/websocket/WebSocketContext.jsx';
 
 const domain =
   process.env.REACT_APP_AUTH0_DOMAIN ||
@@ -55,9 +54,7 @@ root.render(
         ).toString(),
       }}
     >
-      <WebSocketProvider>
-        <App />
-      </WebSocketProvider>
+      <App />
     </Auth0Provider>
   </React.StrictMode>
 );
