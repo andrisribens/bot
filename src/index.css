@@ -79,8 +79,8 @@ body {
   align-items: center;
   gap: 2rem;
   padding: 3rem;
-  max-width: 500px;
-  width: 90%;
+  max-width: 960px;
+  width: 100%;
   animation: fadeInScale 0.8s ease-out forwards;
 }
 
@@ -221,7 +221,7 @@ body {
 
 .requests-table-wrapper {
   width: 100%;
-  max-width: 720px;
+  max-width: 100%;
   background-color: #2d313c;
   border-radius: 16px;
   padding: 1rem;
