@@ -39,29 +39,6 @@ function App() {
 
         {isAuthenticated ? (
           <div className="logged-in-section">
-            <div className="action-buttons">
-              <button
-                type="button"
-                className="button requests"
-                onClick={() => {
-                  setShowRequests(true);
-                  setShowChat(false);
-                }}
-              >
-                PIEPRASĪJUMI
-              </button>
-              <button
-                type="button"
-                className="button chat"
-                onClick={() => {
-                  setShowChat(true);
-                  setShowRequests(false);
-                }}
-              >
-                Čats
-              </button>
-              <LogoutButton />
-            </div>
             {showChat ? <Chat /> : null}
             {showRequests ? (
               <div className="requests-table-wrapper">
@@ -79,6 +56,29 @@ function App() {
                 </table>
               </div>
             ) : null}
+            <div className="action-buttons">
+              <button
+                type="button"
+                className="button chat"
+                onClick={() => {
+                  setShowChat(true);
+                  setShowRequests(false);
+                }}
+              >
+                Čats
+              </button>
+              <button
+                type="button"
+                className="button requests"
+                onClick={() => {
+                  setShowRequests(true);
+                  setShowChat(false);
+                }}
+              >
+                PIEPRASĪJUMI
+              </button>
+              <LogoutButton />
+            </div>
             <div className="profile-card">
               <Profile />
             </div>
