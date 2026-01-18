@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import LoginButton from './LoginButton.jsx';
 import LogoutButton from './LogoutButton.jsx';
@@ -6,14 +6,102 @@ import Profile from './Profile.jsx';
 import Chat from './components/chat/Chat.jsx';
 
 function App() {
-  const { isAuthenticated, isLoading, error } = useAuth0();
+  const { isAuthenticated, isLoading, error, user } = useAuth0();
   const [showRequests, setShowRequests] = useState(false);
   const [showChat, setShowChat] = useState(true);
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  const [requestsError, setRequestsError] = useState(null);
+  const requestsSocket = useRef(null);
+  const socketHost = process.env.WDS_SOCKET_HOST;
+  const socketPort = process.env.WDS_SOCKET_PORT;
+  const socketUrl = socketHost && socketPort ? `wss://${socketHost}:${socketPort}` : null;
+
+  useEffect(() => {
+    return () => {
+      if (requestsSocket.current && requestsSocket.current.readyState !== WebSocket.CLOSED) {
+        requestsSocket.current.close();
+      }
+    };
+  }, []);
+
+  const extractRequests = (payload) => {
+    if (!payload || typeof payload !== 'object') {
+      return [];
+    }
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+    if (Array.isArray(payload.messages)) {
+      return payload.messages;
+    }
+    if (Array.isArray(payload.items)) {
+      return payload.items;
+    }
+    if (Array.isArray(payload.data)) {
+      return payload.data;
+    }
+    if (Array.isArray(payload.results)) {
+      return payload.results;
+    }
+    if (Array.isArray(payload.list)) {
+      return payload.list;
+    }
+    const fallbackList = Object.values(payload).find((value) => Array.isArray(value));
+    return Array.isArray(fallbackList) ? fallbackList : [];
+  };
+
+  const handleRequestsMessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.operation !== 'list_messages') {
+        return;
+      }
+      const records = extractRequests(payload);
+      setRequests(records);
+      setRequestsLoading(false);
+    } catch (err) {
+      setRequestsError('Neizdevās ielādēt pieprasījumus.');
+      setRequestsLoading(false);
+    }
+  };
+
+  const requestMessages = () => {
+    if (!socketUrl) {
+      setRequestsError('Trūkst WebSocket konfigurācijas.');
+      setRequestsLoading(false);
+      return;
+    }
+    setRequestsError(null);
+    setRequestsLoading(true);
+    if (!requestsSocket.current || requestsSocket.current.readyState === WebSocket.CLOSED) {
+      requestsSocket.current = new WebSocket(socketUrl);
+      requestsSocket.current.onmessage = handleRequestsMessage;
+      requestsSocket.current.onerror = () => {
+        setRequestsError('Neizdevās ielādēt pieprasījumus.');
+        setRequestsLoading(false);
+      };
+    }
+    const sendPayload = () => {
+      const payload = {
+        author: user?.name || 'You',
+        operation: 'list_messages',
+        page: 1,
+        page_size: 10,
+      };
+      requestsSocket.current.send(JSON.stringify(payload));
+    };
+    if (requestsSocket.current.readyState === WebSocket.OPEN) {
+      sendPayload();
+    } else {
+      requestsSocket.current.onopen = sendPayload;
+    }
+  };
 
   if (isLoading) {
     return (
       <div className="app-container">
-          <div className="loading-state">
+        <div className="loading-state">
           <div className="loading-text">Pārlādē...</div>
         </div>
       </div>
@@ -52,8 +140,24 @@ function App() {
                       <th>status</th>
                     </tr>
                   </thead>
-                  <tbody />
+                  <tbody>
+                    {requests.map((item, index) => (
+                      <tr key={`${item.date || item.message || 'row'}-${index}`}>
+                        <td>{item.date || ''}</td>
+                        <td>{item.user || item.author || ''}</td>
+                        <td>{item.message || item.request || item.text || ''}</td>
+                        <td>{item.response || item.answer || ''}</td>
+                        <td>{item.status || ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
+                {requestsLoading ? (
+                  <div className="requests-status">Ielādē...</div>
+                ) : null}
+                {requestsError ? (
+                  <div className="requests-status error">{requestsError}</div>
+                ) : null}
               </div>
             ) : null}
             <div className="action-buttons">
@@ -73,6 +177,7 @@ function App() {
                 onClick={() => {
                   setShowRequests(true);
                   setShowChat(false);
+                  requestMessages();
                 }}
               >
                 PIEPRASĪJUMI

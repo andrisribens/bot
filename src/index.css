@@ -250,6 +250,16 @@ body {
   color: #fbd38d;
 }
 
+.requests-status {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: #a0aec0;
+}
+
+.requests-status.error {
+  color: #fc8181;
+}
+
 .profile-picture {
   width: 110px;
   transition: transform 0.3s ease-in-out;

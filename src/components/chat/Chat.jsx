@@ -34,6 +34,9 @@ function Chat() {
         };
         ws.current.onmessage = (event) => {
             const receivedMessage = JSON.parse(event.data);
+            if (receivedMessage.operation) {
+                return;
+            }
             setChatBubbles((chatBubbles) => [
                 ...chatBubbles,
             {
